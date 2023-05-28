@@ -19,14 +19,11 @@ export class AppComponent implements OnInit, AfterViewInit {
 
   // toggle webcam on/off
   public showWebcam = true;
-  public allowCameraSwitch = true;
+  public allowCameraSwitch = false;
+  public facingMode: string = 'user';
   public multipleWebcamsAvailable = false;
   public deviceId!: string;
   public qrcode!: string;
-  public videoOptions: MediaTrackConstraints = {
-    // width: {ideal: 1024},
-    // height: {ideal: 576}
-  };
   public errors: WebcamInitError[] = [];
 
   // webcam snapshot trigger
@@ -35,13 +32,6 @@ export class AppComponent implements OnInit, AfterViewInit {
   private nextWebcam: Subject<boolean | string> = new Subject<
     boolean | string
   >();
-
-  private mediaStream!: MediaStream;
-  @ViewChild('video', { static: true })
-  private video!: ElementRef<HTMLVideoElement>;
-  /** Canvas for Video Snapshots */
-  @ViewChild('canvas', { static: true })
-  private canvas!: ElementRef<HTMLCanvasElement>;
 
   @ViewChild('webcam', { static: true })
   private webcam!: ElementRef<HTMLElement>;
@@ -79,31 +69,18 @@ export class AppComponent implements OnInit, AfterViewInit {
 
   public handleImage(webcamImage: WebcamImage): void {
     this.webcamImage = webcamImage;
-
-    // const video = this.webcam.nativeElement.children[0].children[0]
-    //   .firstChild as HTMLVideoElement;
-
-    // const canvas = this.webcam.nativeElement.children[0].children[0]
-    //   .lastChild as HTMLCanvasElement;
     this.spyCamera();
   }
 
   public spyCamera() {
-    const video = this.webcam.nativeElement.getElementsByTagName(
-      'video'
-    )[0] as HTMLVideoElement;
-
-    const canvas = this.webcam.nativeElement.getElementsByTagName(
-      'canvas'
-    )[0] as HTMLCanvasElement;
-    const { clientWidth, clientHeight } = video;
+    const { clientWidth, clientHeight } = this.video;
 
     console.log(this.webcam.nativeElement);
-    console.log(canvas.width);
-    console.log(canvas.height);
+    console.log(this.canvas.width);
+    console.log(this.canvas.height);
 
-    const ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
-    ctx.drawImage(video, 0, 0, clientWidth, clientHeight);
+    const ctx = this.canvas.getContext('2d') as CanvasRenderingContext2D;
+    ctx.drawImage(this.video, 0, 0, clientWidth, clientHeight);
 
     const inversionAttempts = 'dontInvert';
     const image = ctx.getImageData(0, 0, clientWidth, clientHeight);
@@ -135,7 +112,23 @@ export class AppComponent implements OnInit, AfterViewInit {
     return this.nextWebcam.asObservable();
   }
 
-  public get nativeVideoElement(): HTMLVideoElement {
-    return this.video.nativeElement;
+  public get video(): HTMLVideoElement {
+    return this.webcam.nativeElement.getElementsByTagName(
+      'video'
+    )[0] as HTMLVideoElement;
+  }
+
+  public get canvas(): HTMLCanvasElement {
+    return this.webcam.nativeElement.getElementsByTagName(
+      'canvas'
+    )[0] as HTMLCanvasElement;
+  }
+
+  public get videoOptions(): MediaTrackConstraints {
+    const result: MediaTrackConstraints = {};
+    if (this.facingMode && this.facingMode !== '') {
+      result.facingMode = { ideal: this.facingMode };
+    }
+    return result;
   }
 }
