@@ -20,7 +20,7 @@ export class AppComponent implements OnInit, AfterViewInit {
   // toggle webcam on/off
   public showWebcam = true;
   public allowCameraSwitch = false;
-  public facingMode: string = 'user';
+  public facingMode: string = 'environment';
   public multipleWebcamsAvailable = false;
   public deviceId!: string;
   public qrcode!: string;
